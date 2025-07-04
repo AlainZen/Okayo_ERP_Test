@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Client {
+public class Client { // Représente un client
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

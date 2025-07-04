@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Prestation {
+public class Prestation { // Représente une prestation
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class Prestation {
     private BigDecimal prixUnitaireHT;
 
     @Column(nullable = false)
-    private BigDecimal tauxTVA; // Exemple : 0.20 = 20 %
+    private BigDecimal tauxTVA; // 0.20 = 20 % pour la rapidité
 
     private LocalDate dateDebutValidite;
 

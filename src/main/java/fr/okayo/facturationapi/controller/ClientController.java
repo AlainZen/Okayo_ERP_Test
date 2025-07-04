@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/clients")
-public class ClientController {
+public class ClientController { // Controller pour gérer les clients
 
     private final ClientRepository clientRepository;
 

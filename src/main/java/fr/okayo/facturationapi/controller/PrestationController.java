@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/prestations")
-public class PrestationController {
+public class PrestationController { // Controller pour gérer les prestations
 
     private final PrestationRepository prestationRepository;
 
@@ -17,7 +17,7 @@ public class PrestationController {
     }
 
     @GetMapping
-    public List<Prestation> getAll() {
+    public List<Prestation> getAll() { // Récupère toutes les prestations
         return prestationRepository.findAll();
     }
 

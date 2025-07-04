@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Facture {
+public class Facture { // Représente une facture
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

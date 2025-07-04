@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LigneFacture {
+public class LigneFacture { // Représente une ligne de facture
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

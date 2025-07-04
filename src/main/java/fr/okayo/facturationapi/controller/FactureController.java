@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/factures")
 @RequiredArgsConstructor
-public class FactureController {
+public class FactureController { // Controller pour gérer les factures
 
     private final FactureRepository factureRepository;
     private final ClientRepository clientRepository;
@@ -22,14 +22,14 @@ public class FactureController {
     private final LigneFactureRepository ligneFactureRepository;
 
     @PostMapping
-    public ResponseEntity<Facture> creerFacture(@RequestBody FactureRequest request) {
+    public ResponseEntity<Facture> creerFacture(@RequestBody FactureRequest request) { // Crée une nouvelle facture
         Client client = clientRepository.findById(request.getClientId()).orElseThrow();
 
         List<LigneFacture> lignes = new ArrayList<>();
         BigDecimal totalHT = BigDecimal.ZERO;
         BigDecimal totalTTC = BigDecimal.ZERO;
 
-        for (FactureRequest.Ligne ligne : request.getLignes()) {
+        for (FactureRequest.Ligne ligne : request.getLignes()) { // Pour chaque ligne de la facture
             Prestation prestation = prestationRepository.findById(ligne.getPrestationId()).orElseThrow();
 
             BigDecimal prixHT = prestation.getPrixUnitaireHT().multiply(BigDecimal.valueOf(ligne.getQuantite()));
@@ -40,7 +40,7 @@ public class FactureController {
                     .quantite(ligne.getQuantite())
                     .prixUnitaireHT(prestation.getPrixUnitaireHT())
                     .tauxTVA(prestation.getTauxTVA())
-                    .facture(null) // sera set après
+                    .facture(null) // Pour plus tard
                     .build();
 
             lignes.add(lf);
@@ -67,8 +67,8 @@ public class FactureController {
         return ResponseEntity.ok(facture);
     }
 
-    @GetMapping
-    public List<Facture> getAll() {
+    @GetMapping 
+    public List<Facture> getAll() { // Récupère toutes les factures
         List<Facture> factures = factureRepository.findAll();
         for (Facture f : factures) {
             f.setLignes(ligneFactureRepository.findByFacture(f));
@@ -76,7 +76,7 @@ public class FactureController {
         return factures;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}") // Récupère une facture par son ID
     public ResponseEntity<Facture> getOne(@PathVariable Long id) {
         return factureRepository.findById(id)
                 .map(facture -> {
@@ -86,7 +86,7 @@ public class FactureController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}") // Met à jour une facture existante
     public ResponseEntity<Facture> update(@PathVariable Long id, @RequestBody Facture updatedFacture) {
         return factureRepository.findById(id)
                 .map(facture -> {
@@ -100,7 +100,7 @@ public class FactureController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}") // Supprime une facture par son ID
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return factureRepository.findById(id)
                 .map(facture -> {
