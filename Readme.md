@@ -57,34 +57,41 @@ Ce projet répond à l'exercice technique suivant : créer un modèle de donnée
   "email": "Alain.sliman@gmail.com"
 }
 ```
-
-### ➕ POST `/api/factures`
+### ➕ POST `/api/prestations`
 ```json
 {
+  "nom": "Création de site vitrine",
+  "prixUnitaireHT": 1200.00,
+  "tauxTVA": 0.20
+}
+```
+### ➕ POST `/api/factures`
+```json
+  {
   "reference": "2025-0001",
   "clientId": 1,
   "lignes": [
-    {
-      "nom": "Création de site vitrine",
-      "quantite": 2,
-      "prixUnitaireHT": 1200.00,
-      "tauxTVA": 0.20
-    },
-    {
-      "nom": "Maintenance annuelle",
-      "quantite": 1,
-      "prixUnitaireHT": 1200.00,
-      "tauxTVA": 0.20
-    }
+    { "prestationId": 1, "quantite": 2 },
+    { "prestationId": 1, "quantite": 1 }
   ]
 }
 ```
 
-#### ✅ Calcul automatique :
-
-Total HT : 2×1200 + 1×1200 = 3600
-
-Total TTC : 3600 × 1.20 = 4320.00
+#### 🧮 Réponse attendue (extrait)
+```json
+{
+  "totalHT": 3600.00,
+  "totalTTC": 3607.20,
+  "lignes": [
+    {
+      "nom": "Création de site vitrine",
+      "prixUnitaireHT": 1200.00,
+      "tauxTVA": 0.20,
+      "quantite": 2
+    }
+  ]
+}
+```
 
 ### 🔁 PUT `/api/factures/{id}`
 Permet de modifier une facture (client et lignes). Le calcul HT/TTC est automatiquement mis à jour.
