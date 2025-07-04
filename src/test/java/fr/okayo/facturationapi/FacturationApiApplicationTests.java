@@ -1,4 +1,4 @@
-package fr.okayo.facturation_api;
+package fr.okayo.facturationapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
