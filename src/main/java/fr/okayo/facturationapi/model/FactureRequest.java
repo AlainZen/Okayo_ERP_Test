@@ -1,10 +1,12 @@
 package fr.okayo.facturationapi.model;
 
 import lombok.Data;
+
 import java.util.List;
 
 @Data
 public class FactureRequest {
+    private String reference;
     private Long clientId;
     private List<Ligne> lignes;
 

@@ -2,7 +2,7 @@ package fr.okayo.facturationapi.controller;
 
 import fr.okayo.facturationapi.model.*;
 import fr.okayo.facturationapi.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,19 +13,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/factures")
+@RequiredArgsConstructor
 public class FactureController {
 
-    @Autowired
-    private FactureRepository factureRepository;
-
-    @Autowired
-    private ClientRepository clientRepository;
-
-    @Autowired
-    private PrestationRepository prestationRepository;
-
-    @Autowired
-    private LigneFactureRepository ligneFactureRepository;
+    private final FactureRepository factureRepository;
+    private final ClientRepository clientRepository;
+    private final PrestationRepository prestationRepository;
+    private final LigneFactureRepository ligneFactureRepository;
 
     @PostMapping
     public ResponseEntity<Facture> creerFacture(@RequestBody FactureRequest request) {
@@ -33,36 +27,33 @@ public class FactureController {
 
         List<LigneFacture> lignes = new ArrayList<>();
         BigDecimal totalHT = BigDecimal.ZERO;
-        BigDecimal totalTVA = BigDecimal.ZERO;
+        BigDecimal totalTTC = BigDecimal.ZERO;
 
         for (FactureRequest.Ligne ligne : request.getLignes()) {
             Prestation prestation = prestationRepository.findById(ligne.getPrestationId()).orElseThrow();
 
-            BigDecimal montantHT = prestation.getPrixUnitaireHT().multiply(BigDecimal.valueOf(ligne.getQuantite()));
-            BigDecimal montantTVA = montantHT.multiply(prestation.getTauxTVA());
-            BigDecimal montantTTC = montantHT.add(montantTVA);
+            BigDecimal prixHT = prestation.getPrixUnitaireHT().multiply(BigDecimal.valueOf(ligne.getQuantite()));
+            BigDecimal prixTTC = prixHT.add(prixHT.multiply(prestation.getTauxTVA().divide(BigDecimal.valueOf(100))));
 
             LigneFacture lf = LigneFacture.builder()
-                    .designation(prestation.getNom())
+                    .nom(prestation.getNom())
                     .quantite(ligne.getQuantite())
                     .prixUnitaireHT(prestation.getPrixUnitaireHT())
-                    .montantHT(montantHT)
-                    .montantTVA(montantTVA)
-                    .montantTTC(montantTTC)
+                    .tauxTVA(prestation.getTauxTVA())
+                    .facture(null) // sera set après
                     .build();
 
             lignes.add(lf);
-            totalHT = totalHT.add(montantHT);
-            totalTVA = totalTVA.add(montantTVA);
+            totalHT = totalHT.add(prixHT);
+            totalTTC = totalTTC.add(prixTTC);
         }
 
         Facture facture = Facture.builder()
-                .reference("FACT-" + System.currentTimeMillis())
+                .reference(request.getReference())
                 .dateFacturation(LocalDate.now())
                 .client(client)
                 .totalHT(totalHT)
-                .totalTTC(totalHT.add(totalTVA))
-                .lignes(new ArrayList<>())
+                .totalTTC(totalTTC)
                 .build();
 
         facture = factureRepository.save(facture);
@@ -73,19 +64,49 @@ public class FactureController {
         }
 
         facture.setLignes(ligneFactureRepository.findByFacture(facture));
-
         return ResponseEntity.ok(facture);
     }
 
     @GetMapping
-    public List<Facture> getAllFactures() {
-        return factureRepository.findAll();
+    public List<Facture> getAll() {
+        List<Facture> factures = factureRepository.findAll();
+        for (Facture f : factures) {
+            f.setLignes(ligneFactureRepository.findByFacture(f));
+        }
+        return factures;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Facture> getFactureById(@PathVariable Long id) {
+    public ResponseEntity<Facture> getOne(@PathVariable Long id) {
         return factureRepository.findById(id)
-                .map(ResponseEntity::ok)
+                .map(facture -> {
+                    facture.setLignes(ligneFactureRepository.findByFacture(facture));
+                    return ResponseEntity.ok(facture);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Facture> update(@PathVariable Long id, @RequestBody Facture updatedFacture) {
+        return factureRepository.findById(id)
+                .map(facture -> {
+                    facture.setReference(updatedFacture.getReference());
+                    facture.setDateFacturation(updatedFacture.getDateFacturation());
+                    facture.setClient(updatedFacture.getClient());
+                    facture.setTotalHT(updatedFacture.getTotalHT());
+                    facture.setTotalTTC(updatedFacture.getTotalTTC());
+                    return ResponseEntity.ok(factureRepository.save(facture));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        return factureRepository.findById(id)
+                .map(facture -> {
+                    factureRepository.delete(facture);
+                    return ResponseEntity.ok().build();
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 }

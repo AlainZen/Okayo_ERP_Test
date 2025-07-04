@@ -17,15 +17,12 @@ public class LigneFacture {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String designation;
+    private String nom;
     private int quantite;
     private BigDecimal prixUnitaireHT;
-    private BigDecimal montantHT;
-    private BigDecimal montantTVA;
-    private BigDecimal montantTTC;
+    private BigDecimal tauxTVA;
 
     @ManyToOne
-    @JoinColumn(name = "facture_id")
     @JsonBackReference
     private Facture facture;
 }

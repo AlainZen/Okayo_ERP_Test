@@ -19,7 +19,7 @@ public class Facture {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String reference; // Ex: 2025-0001
+    private String reference;
     private LocalDate dateFacturation;
 
     @ManyToOne
